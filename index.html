@@ -1,1 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#4f46e5">
+<title>L-4-b Idea Generation Tool</title>
+<style>
+:root{--bg:#f4f6fb;--fg:#1b2030;--card:#fff;--ac:#4f46e5;--ac2:#7c3aed;--mut:#667085;--ln:#e4e7ee;--ok:#e6f6ec;--sh:0 1px 2px rgba(16,24,40,.06),0 4px 14px rgba(16,24,40,.06)}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1117;--fg:#eef0f6;--card:#181b24;--ac:#8b8cf8;--ac2:#a78bfa;--mut:#9aa3b2;--ln:#2a2f3b;--ok:#16301f;--sh:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.3)}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0 auto;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;max-width:640px;padding:12px 12px 48px;line-height:1.4}
+.hero{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;border-radius:16px;padding:16px 18px;margin-bottom:12px;box-shadow:var(--sh)}
+.hero h1{margin:0;font-size:21px}.hero p{margin:4px 0 0;font-size:13px;opacity:.9}
+nav{display:flex;gap:6px;position:sticky;top:0;z-index:5;background:var(--bg);padding:6px 0 8px}
+nav button{flex:1;padding:10px 2px;border:1px solid var(--ln);background:var(--card);color:var(--fg);border-radius:10px;font-size:13px;font-weight:600;transition:.15s}
+nav button.on{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;border-color:transparent}
+.card{background:var(--card);border:1px solid var(--ln);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:var(--sh)}
+.mut{color:var(--mut);font-size:13px}
+.row{display:flex;gap:8px;margin:10px 0}
+input[type=text],select,input[type=number]{padding:11px 12px;border:1px solid var(--ln);border-radius:10px;background:var(--bg);color:var(--fg);font-size:16px;outline:none;transition:.15s}
+input[type=text]{flex:1;min-width:0}input[type=number]{width:64px}select{flex:1}
+input:focus,select:focus{border-color:var(--ac);box-shadow:0 0 0 3px color-mix(in srgb,var(--ac) 20%,transparent)}
+button{font-family:inherit;cursor:pointer;transition:transform .1s,opacity .15s}button:active{transform:scale(.96)}
+button.p{padding:11px 16px;border:0;border-radius:10px;background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;font-size:15px;font-weight:600}
+button.g{padding:9px 13px;border:1px solid var(--ln);border-radius:10px;background:var(--card);color:var(--fg);font-size:14px}
+.it{display:flex;align-items:center;gap:8px;padding:10px 8px;border-bottom:1px solid var(--ln);border-radius:8px}
+.it:last-child{border-bottom:0}
+.it.sel{background:var(--ok)}
+.it input[type=checkbox]{width:22px;height:22px;accent-color:var(--ac)}
+.it select{max-width:125px;flex:none;font-size:14px;padding:8px}
+.it .t{flex:1;word-break:break-word;font-weight:500}
+.it button{border:1px solid var(--ln);background:var(--card);color:var(--fg);border-radius:8px;min-width:34px;height:34px;font-size:16px}
+.v{min-width:26px;text-align:center;font-weight:700;background:var(--bg);border-radius:8px;padding:5px 0}
+.chip{display:inline-block;background:var(--bg);border:1px solid var(--ln);padding:5px 12px;border-radius:99px;margin:3px 3px 3px 0;font-size:14px}
+.chip a{color:var(--mut);text-decoration:none;margin-left:4px}
+.sum td{padding:8px;border:1px solid var(--ln)}
+table{border-collapse:collapse;width:100%;border-radius:10px;overflow:hidden}
+.ph{display:flex;gap:6px;margin-bottom:12px}
+.ph button{flex:1;padding:9px 2px;border:1px solid var(--ln);background:var(--card);color:var(--fg);border-radius:10px;font-size:13px}
+.ph button.on{border-color:var(--ac);color:var(--ac);font-weight:700;background:color-mix(in srgb,var(--ac) 10%,var(--card))}
+.gh{margin:14px 0 4px;font-weight:700;color:var(--ac);font-size:15px}
+.bar{height:8px;background:var(--ln);border-radius:99px;overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ac),var(--ac2));transition:width .3s}
+.badge{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;color:#fff;font-size:13px;font-weight:700;margin-right:3px;box-shadow:0 1px 2px rgba(0,0,0,.25)}
+a{color:var(--ac)}
+@media print{nav,.noprint,.hero{display:none}body{background:#fff;color:#000}.card{box-shadow:none}}
+</style>
+</head>
+<body>
+<div class="hero"><h1>💡 L-4-b Idea Generation</h1><p>Brainstorm → merge &amp; group → multi-vote → summary</p></div>
+<nav id="nav"></nav>
+<div id="app"></div>
 
+<script>
+const WORDS=["umbrella","spring","magnet","hinge","clock","zipper","battery","lever","mirror","candle","wheel","sponge","bridge","pencil","balloon","lock","fan","bottle","thermometer","engine","gear","rope","lens","drum","kettle","ladder","pump","button","whistle","tape"];
+const ST={
+ art:{name:"1 Artifacts",title:"Possible artifacts",min:20,keepMin:6,keepMax:10,help:"none",ph:"Add an artifact name"},
+ must:{name:"2 Musts",title:"Constraints (musts)",min:10,keepMin:3,keepMax:3,help:"none",ph:"Add a constraint (e.g. must be obtainable)"},
+ want:{name:"3 Wants",title:"Desires (wants)",min:10,keepMin:3,keepMax:4,help:"random",ph:"Add a desire (e.g. many parts when dissected)"}
+};
+const DB_URL="";   // paste your Firebase Realtime Database URL here to enable live team sync
+const ROOM="team";
+let S={art:[],must:[],want:[]},tab="art",aux="",note="",chk=[],mg=null;
+try{const x=JSON.parse(localStorage.getItem("l4b"));if(x)S=x}catch(e){}
+if(!S.members){S.members=["Member 1","Member 2","Member 3","Member 4","Member 5"];S.cur=0}
+if(!S.cats)S.cats={art:[],must:[],want:[]};
+if(!S.ph)S.ph={art:1,must:1,want:1};
+S=fix(S);
+const save=()=>{try{localStorage.setItem("l4b",JSON.stringify(S))}catch(e){}push()};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const norm=s=>s.toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
+const names=i=>(i.by||[]).map(b=>sym(b)+" "+esc(S.members[b]||"?")).join(" ");
+
+function nav(){
+  const n=[...Object.keys(ST).map(k=>[k,ST[k].name]),["sum","4 Summary"]];
+  document.getElementById("nav").innerHTML=n.map(([k,t])=>`<button class="${k===tab?'on':''}" onclick="go('${k}')">${t}</button>`).join("");
+}
+function go(k){tab=k;aux="";note="";chk=[];mg=null;render()}
+function setPh(n){S.ph[tab]=n;note="";chk=[];mg=null;save();render()}
+
+function render(){
+  nav();
+  const app=document.getElementById("app");
+  if(me===null)return app.innerHTML=picker();
+  if(tab==="sum")return app.innerHTML=topbar()+summary();
+  const c=ST[tab],L=S[tab],p=S.ph[tab];
+  const bar=`<div class="ph">${["① Brainstorm","② Merge & group","③ Multi-vote"].map((t,i)=>`<button class="${p===i+1?'on':''}" onclick="setPh(${i+1})">${t}</button>`).join("")}</div>`;
+  const head=`<div class="card"><b>${c.title}</b><div class="mut">${L.length} listed (target at least ${c.min}) ${L.length>=c.min?"✅":""}</div><div class="bar"><i style="width:${Math.min(100,Math.round(L.length/c.min*100))}%"></i></div></div>`;
+  app.innerHTML=topbar()+bar+head+(p===1?ph1(c,L):p===2?ph2(c,L):ph3(c,L));
+}
+
+function ph1(c,L){
+  const help=c.help!=="random"?"":`<div class="card"><b>Random stimulation</b><p>${(aux||[]).length?aux.map(w=>`<span class="chip">${w}</span>`).join(""):"Tap for random words; link each to a desire."}</p><button class="g" onclick="aux=[pick(WORDS),pick(WORDS),pick(WORDS)];render()">New words</button></div>`;
+  return `<div class="card"><div class="row"><button class="g" onclick="rename()">Rename team</button></div>
+   <div class="row"><input type="text" id="in" placeholder="${c.ph}" onkeydown="if(event.key==='Enter')add()"><button class="p" onclick="add()">Add</button></div>
+   <div class="mut">${esc(note)}</div></div>${help}
+   <div class="card">${L.map((i,x)=>`<div class="it"><span class="t">${esc(i.t)}<div class="mut">${names(i)}</div></span><button onclick="del(${x})">✕</button></div>`).join("")||'<p class="mut">Nothing yet.</p>'}</div>`;
+}
+
+function ph2(c,L){
+  const cs=S.cats[tab];
+  let m="";
+  if(mg){m=`<div class="card" style="border-color:var(--ac)"><b>Choose the best wording to keep</b>
+   ${mg.map(x=>`<div class="it"><label><input type="radio" name="mt" onclick="document.getElementById('mt').value=S[tab][${x}].t" ${x===mg[0]?'checked':''}> ${esc(L[x].t)}</label></div>`).join("")}
+   <p class="mut">Or edit the final wording:</p>
+   <div class="row"><input type="text" id="mt" value="${esc(L[mg[0]].t)}"></div>
+   <button class="p" onclick="doMerge()">Merge into one</button> <button class="g" onclick="mg=null;render()">Cancel</button></div>`}
+  return m+`<div class="card"><b>Merge duplicates</b>
+   <p class="mut">Tick two or more ideas that mean the same thing, then merge and pick the best wording. Names and votes are combined.</p>
+   <div class="row"><button class="p" onclick="startMerge()">Merge ticked (${chk.length})</button><button class="g" onclick="dedupe()">Auto-merge exact copies</button></div>
+   <div class="mut">${esc(note)}</div></div>
+  <div class="card"><b>Categories</b>
+   <div class="row"><input type="text" id="cn" placeholder="New category (e.g. Kitchen items)" onkeydown="if(event.key==='Enter')addCat()"><button class="p" onclick="addCat()">Add</button></div>
+   ${cs.map((k,x)=>`<span class="chip">${esc(k)} <a href="#" onclick="delCat(${x});return false">✕</a></span>`).join("")}</div>
+  <div class="card">${L.map((i,x)=>`<div class="it"><input type="checkbox" ${chk.includes(x)?'checked':''} onchange="tk(${x})"><span class="t">${esc(i.t)}<div class="mut">${names(i)}</div>${hint(L,x)}</span><select onchange="setCat(${x},this.value)"><option value="">No category</option>${cs.map(k=>`<option value="${esc(k)}" ${i.c===k?'selected':''}>${esc(k)}</option>`).join("")}</select><button onclick="edit(${x})">✎</button><button onclick="del(${x})">✕</button></div>`).join("")||'<p class="mut">Nothing yet.</p>'}</div>`;
+}
+
+function ph3(c,L){
+  const cs=S.cats[tab],votes=Math.max(1,Math.ceil(L.length/3)),sel=L.filter(i=>i.s).length;
+  const groups=[...cs,""].map(k=>[k,L.map((i,x)=>[i,x]).filter(([i])=>(cs.includes(i.c)?i.c:"")===k)]).filter(g=>g[1].length);
+  return `<div class="card"><b>Multi-voting</b>
+   <p class="mut"><b>Your votes left: ${budget()-used()} of ${budget()}</b> (⅓ of the list each). Tap + to vote; one idea can get several of your votes. Keep ${c.keepMin===c.keepMax?c.keepMin:c.keepMin+"–"+c.keepMax}. (${sel} kept)</p><div class="mut">${esc(note)}</div>
+   <div class="row noprint"><span class="mut" style="align-self:center">Keep top</span><input type="number" id="n" min="1" value="${c.keepMax}"><button class="p" onclick="auto()">Auto-pick</button><button class="g" onclick="resetV()">Reset votes</button></div>
+   ${groups.map(([k,its])=>`<div class="gh">${k?esc(k):"Uncategorized"} · ${its.reduce((a,[i])=>a+tot(i),0)} votes</div>`+its.map(([i,x])=>`<div class="it ${i.s?'sel':''}"><span class="t">${esc(i.t)}<div class="mut">${names(i)}</div><div>${tally(i)}</div></span><button onclick="vote(${x},-1)">−</button><span class="v">${tot(i)}</span><button onclick="vote(${x},1)">+</button><button onclick="tog(${x})">${i.s?'★':'☆'}</button></div>`).join("")).join("")||'<p class="mut">Nothing yet.</p>'}</div>`;
+}
+
+function add(){const el=document.getElementById("in"),t=el.value.trim().replace(/\s+/g," ");if(!t)return;
+ const d=S[tab].find(i=>norm(i.t)===norm(t));
+ if(d){d.by=d.by||[];
+  if(d.by.includes(me))note=S.members[me]+' already added "'+d.t+'".';
+  else{d.by.push(me);note='Duplicate merged: "'+d.t+'" now credited to '+d.by.map(b=>S.members[b]).join(", ")+".";}
+  save();render();document.getElementById("in").focus();return}
+ S[tab].push({t,v:0,vt:{},s:0,w:5,by:[me],c:""});note="";save();render();document.getElementById("in").focus()}
+function rename(){S.members=S.members.map((m,x)=>{const n=prompt("Name of member "+(x+1),m);return n&&n.trim()?n.trim():m});save();render()}
+function tk(x){chk=chk.includes(x)?chk.filter(y=>y!==x):[...chk,x].sort((a,b)=>a-b);render()}
+function startMerge(){if(chk.length<2){note="Tick at least two ideas first.";render();return}mg=chk.slice();render()}
+function doMerge(){
+  const t=document.getElementById("mt").value.trim();if(!t)return;
+  const L=S[tab],f=L[mg[0]];
+  mg.slice(1).forEach(x=>{const i=L[x];f.by=[...new Set([...(f.by||[]),...(i.by||[])])];mv(f,i);f.s=f.s||i.s;f.c=f.c||i.c});
+  f.t=t;
+  S[tab]=L.filter((_,x)=>!mg.slice(1).includes(x));
+  note='Merged into "'+t+'".';chk=[];mg=null;save();render();
+}
+function dedupe(){const m=new Map();S[tab].forEach(i=>{const k=norm(i.t),f=m.get(k);if(!f){i.by=i.by||[];m.set(k,i)}else{f.by=[...new Set([...(f.by||[]),...(i.by||[])])];mv(f,i);f.s=f.s||i.s;f.c=f.c||i.c}});S[tab]=[...m.values()];chk=[];note="Exact copies merged.";save();render()}
+function addCat(){const el=document.getElementById("cn"),t=el.value.trim();if(!t||S.cats[tab].some(k=>norm(k)===norm(t)))return;S.cats[tab].push(t);save();render();document.getElementById("cn").focus()}
+function delCat(x){const k=S.cats[tab][x];S.cats[tab].splice(x,1);S[tab].forEach(i=>{if(i.c===k)i.c=""});save();render()}
+function setCat(x,v){S[tab][x].c=v;save();render()}
+function vote(x,d){const i=S[tab][x],k="m"+me;i.vt=i.vt||{};const mine=i.vt[k]||0;
+ if(d>0&&used()>=budget()){note="You have no votes left.";render();return}
+ if(d<0&&!mine)return;
+ note="";i.vt[k]=mine+d;if(!i.vt[k])delete i.vt[k];save();render()}
+function tog(x){const i=S[tab][x];i.s=i.s?0:1;save();render()}
+function del(x){S[tab].splice(x,1);chk=[];save();render()}
+function resetV(){S[tab].forEach(i=>{i.v=0;i.vt={}});save();render()}
+function auto(){
+  const n=+document.getElementById("n").value||1;
+  const o=S[tab].map((i,x)=>[tot(i),x]).sort((a,b)=>b[0]-a[0]);
+  S[tab].forEach(i=>i.s=0);o.slice(0,n).forEach(([v,x])=>S[tab][x].s=1);save();render();
+}
+function wt(x,val){S.want[x].w=Math.min(10,Math.max(1,+val||1));save()}
+function summary(){
+  const k=t=>S[t].filter(i=>i.s),lab=i=>esc(i.t)+(i.c?` <span class="mut">(${esc(i.c)})</span>`:"");
+  const rows=(t,n)=>Array.from({length:n},(_,x)=>`<tr><td>${x+1}</td><td>${k(t)[x]?lab(k(t)[x]):""}</td></tr>`).join("");
+  const wants=S.want.map((i,x)=>[i,x]).filter(([i])=>i.s);
+  const ck=(ok,t)=>`<div>${ok?"✅":"⚠️"} ${t}</div>`;
+  const n=(t)=>S[t].length,kp=t=>k(t).length;
+  const checks=ck(n("art")>=20,`Artifacts listed: ${n("art")} (need 20+)`)+ck(kp("art")>=6&&kp("art")<=10,`Artifacts kept: ${kp("art")} (need 6–10)`)
+   +ck(n("must")>=10,`Musts listed: ${n("must")} (need 10+)`)+ck(kp("must")>=3,`Musts kept: ${kp("must")} (need at least 3)`)
+   +ck(n("want")>=10,`Wants listed: ${n("want")} (need 10+)`)+ck(kp("want")>=3&&kp("want")<=4,`Wants kept: ${kp("want")} (need 3–4)`);
+  const team=S.members.map((m,x)=>{const ideas=["art","must","want"].reduce((a,t)=>a+S[t].filter(i=>(i.by||[]).includes(x)).length,0);
+    const vts=["art","must","want"].reduce((a,t)=>a+S[t].reduce((c,i)=>c+((i.vt||{})["m"+x]||0),0),0);
+    return `<tr><td>${sym(x)} ${esc(m)}</td><td>${ideas} ideas</td><td>${vts} votes</td></tr>`}).join("");
+  return `<div class="card"><b>Checklist</b><div style="margin-top:6px">${checks}</div></div>
+  <div class="card"><b>Summary of L-4-b</b><p class="mut">The official sheet must be filled in by hand. Copy these final selections onto it.</p>
+  <b>1. Artifacts</b><table class="sum">${rows("art",Math.max(6,kp("art")))}</table>
+  <p><b>2. Musts</b></p><table class="sum">${rows("must",Math.max(3,kp("must")))}</table>
+  <p><b>3. Wants and weights</b></p><table class="sum">${wants.map(([i,x],q)=>`<tr><td>${q+1}</td><td>${lab(i)}</td><td><input type="number" min="1" max="10" value="${i.w}" onchange="wt(${x},this.value)"></td></tr>`).join("")||'<tr><td>No wants selected</td></tr>'}</table>
+  <p class="mut">Weights run 1–10 (10 = most important).</p></div>
+  <div class="card"><b>Team contributions</b><p class="mut">Evidence of teamwork for your notebook.</p><table class="sum">${team}</table></div>
+  <div class="card noprint"><button class="p" onclick="dl()">Download full record (.txt)</button> <button class="g" onclick="window.print()">Print</button> <button class="g" onclick="if(confirm('Clear everything for the WHOLE team? This cannot be undone.')){S={art:[],must:[],want:[],members:S.members,cur:0,cats:{art:[],must:[],want:[]},ph:{art:1,must:1,want:1}};save();render()}">Clear all</button></div>`;
+}
+
+const COL=["#e53935","#1e88e5","#43a047","#fb8c00","#8e24aa"];
+let me=null;try{const v=localStorage.getItem("l4b_me");if(v!==null)me=+v}catch(e){}
+const sym=x=>`<span class="badge" style="background:${COL[x]||"#888"}">${x+1}</span>`;
+const tot=i=>(i.v||0)+Object.values(i.vt||{}).reduce((a,b)=>a+b,0);
+const tally=i=>Object.keys(i.vt||{}).sort().map(k=>sym(+k.slice(1))+"×"+i.vt[k]).join(" ");
+const used=()=>S[tab].reduce((a,i)=>a+((i.vt||{})["m"+me]||0),0);
+const budget=()=>Math.max(1,Math.ceil(S[tab].length/3));
+function mv(f,i){f.v=(f.v||0)+(i.v||0);f.vt=f.vt||{};Object.entries(i.vt||{}).forEach(([k,n])=>f.vt[k]=(f.vt[k]||0)+n)}
+function fix(d){
+  const arr=a=>Array.isArray(a)?a:Object.values(a||{});
+  const n={...d};
+  ["art","must","want"].forEach(k=>{n[k]=arr(d[k]).map(i=>({v:0,s:0,w:5,c:"",...i,by:arr(i.by),vt:i.vt||{}}))});
+  n.members=d.members?arr(d.members):["Member 1","Member 2","Member 3","Member 4","Member 5"];
+  n.cats={};["art","must","want"].forEach(k=>n.cats[k]=arr((d.cats||{})[k]));
+  n.ph={art:1,must:1,want:1,...(d.ph||{})};
+  return n;
+}
+const canon=o=>Array.isArray(o)?o.map(canon):o&&typeof o==="object"?Object.fromEntries(Object.keys(o).sort().map(k=>[k,canon(o[k])])):o;
+function pickMe(x){me=x;try{localStorage.setItem("l4b_me",x)}catch(e){}render()}
+function picker(){return `<div class="card"><b>Who are you?</b><p class="mut">Pick your member symbol. You will add ideas and vote as this member.</p>${S.members.map((m,x)=>`<div class="it" onclick="pickMe(${x})">${sym(x)}<span class="t">${esc(m)}</span></div>`).join("")}</div>`}
+function topbar(){return `<div class="card noprint"><div class="row" style="align-items:center;margin:0">${sym(me)}<b style="flex:1">${esc(S.members[me]||"")}</b><button class="g" onclick="me=null;render()">Switch</button><button class="g" onclick="syncUI()">${url?stat:"Sync off"}</button></div></div>`}
+
+/* ---- live sync (Firebase Realtime Database REST) ---- */
+let url=DB_URL,room=ROOM,stat="○ connecting";
+try{const q=new URLSearchParams(location.search),sv=JSON.parse(localStorage.getItem("l4b_sync")||"null");
+ if(q.get("db")){url=q.get("db");room=q.get("room")||ROOM}else if(!url&&sv){url=sv.url;room=sv.room}}catch(e){}
+url=(url||"").replace(/\/+$/,"");
+const endpoint=()=>url+"/l4b-"+encodeURIComponent(room)+".json";
+async function push(){if(!url)return;try{await fetch(endpoint(),{method:"PUT",body:JSON.stringify(S)});stat="● live"}catch(e){stat="○ offline"}}
+async function pull(nr){
+  if(!url)return;
+  try{
+    const d=await (await fetch(endpoint())).json();stat="● live";
+    if(!d){push();return}
+    const n=fix(d);
+    if(JSON.stringify(canon(n))!==JSON.stringify(canon(fix(S)))){
+      S=n;try{localStorage.setItem("l4b",JSON.stringify(S))}catch(e){}
+      const a=document.activeElement;
+      if(!nr&&!mg&&!(a&&a.tagName==="INPUT"&&a.type==="text"&&a.value))render();
+    }
+  }catch(e){stat="○ offline"}
+}
+function syncUI(){
+  const link=()=>location.origin+location.pathname+"?db="+encodeURIComponent(url)+"&room="+encodeURIComponent(room);
+  if(url){
+    if(confirm("Connected to group \""+room+"\".\nOK = disconnect on this device.\nCancel = show the invite link.")){url="";try{localStorage.removeItem("l4b_sync")}catch(e){}}
+    else prompt("Send this link to your team:",link());
+  }else{
+    const u=prompt("Firebase Realtime Database URL (e.g. https://yourproject-default-rtdb.firebaseio.com)");if(!u)return;
+    const r=prompt("Group code (same for all 5 of you)",ROOM)||ROOM;
+    url=u.trim().replace(/\/+$/,"");room=r.trim();
+    try{localStorage.setItem("l4b_sync",JSON.stringify({url,room}))}catch(e){}
+    pull().then(()=>prompt("Send this link to your team:",link()));
+  }
+  render();
+}
+["add","vote","tog","del","resetV","auto","doMerge","dedupe","addCat","delCat","setCat","rename","edit"].forEach(n=>{const f=window[n];window[n]=async(...a)=>{await pull(true);f(...a)}});
+setInterval(()=>pull(),3000);pull();
+
+/* ---- similar-idea hints, editing ---- */
+const stem=w=>w.replace(/(ing|es|s)$/,"");
+const wordsOf=t=>norm(t).split(" ").filter(Boolean).map(stem);
+function lev(a,b){const d=Array.from({length:a.length+1},(_,i)=>[i]);for(let j=1;j<=b.length;j++)d[0][j]=j;
+ for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[a.length][b.length]}
+function similar(a,b){
+  const x=norm(a),y=norm(b);if(!x||!y)return false;if(x===y)return true;
+  if(x.length>3&&y.length>3&&(x.includes(y)||y.includes(x)))return true;
+  const A=wordsOf(a),B=wordsOf(b);if(A.join(" ")===B.join(" "))return true;
+  const sa=new Set(A),inter=B.filter(w=>sa.has(w)).length,m=Math.min(A.length,B.length);
+  if(m>=2&&inter>=m)return true;
+  return Math.min(x.length,y.length)>=5&&Math.max(x.length,y.length)<=14&&lev(x,y)<=2;
+}
+function hint(L,x){
+  const y=L.findIndex((j,k)=>k!==x&&similar(L[x].t,j.t));
+  if(y<0||(chk.includes(x)&&chk.includes(y)))return "";
+  return `<div class="mut"><a href="#" onclick="both(${x},${y});return false">≈ maybe the same as “${esc(L[y].t)}”: tick both</a></div>`;
+}
+function both(x,y){[x,y].forEach(k=>{if(!chk.includes(k))chk.push(k)});chk.sort((a,b)=>a-b);render()}
+function edit(x){const t=prompt("Edit idea",S[tab][x].t);if(t&&t.trim()){S[tab][x].t=t.trim().replace(/\s+/g," ");save();render()}}
+
+/* ---- record download ---- */
+function record(){
+  let o="L-4-b IDEA GENERATION RECORD\n"+new Date().toLocaleString()+"\nTeam: "+S.members.join(", ")+"\n\n";
+  [["art","ARTIFACTS"],["must","MUSTS"],["want","WANTS"]].forEach(([k,n])=>{
+    o+=n+" ("+S[k].length+" ideas)\n";
+    S[k].forEach(i=>{o+=" "+(i.s?"[KEPT] ":"")+i.t+(i.c?" ("+i.c+")":"")+" - by "+(i.by||[]).map(b=>S.members[b]).join(", ")+" - votes "+tot(i)+(k==="want"&&i.s?" - weight "+i.w:"")+"\n"});
+    o+="\n"});
+  return o;
+}
+function dl(){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([record()],{type:"text/plain"}));a.download="L-4-b-idea-generation.txt";a.click()}
+render();
+</script>
+</body>
+</html>
