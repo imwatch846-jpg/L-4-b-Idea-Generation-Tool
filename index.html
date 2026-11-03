@@ -59,7 +59,7 @@ const ST={
  must:{name:"2 Musts",title:"Constraints (musts)",min:10,keepMin:3,keepMax:3,help:"none",ph:"Add a constraint (e.g. must be obtainable)"},
  want:{name:"3 Wants",title:"Desires (wants)",min:10,keepMin:3,keepMax:4,help:"random",ph:"Add a desire (e.g. many parts when dissected)"}
 };
-const DB_URL="";   // paste your Firebase Realtime Database URL here to enable live team sync
+const DB_URL="https://l-4-b-72624-default-rtdb.europe-west1.firebasedatabase.app/";   // paste your Firebase Realtime Database URL here to enable live team sync
 const ROOM="team";
 let S={art:[],must:[],want:[]},tab="art",aux="",note="",chk=[],mg=null;
 try{const x=JSON.parse(localStorage.getItem("l4b"));if(x)S=x}catch(e){}
